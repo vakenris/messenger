@@ -1,0 +1,119 @@
+.button-send{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #4960EB;
+    color: #fff;
+    border: none;
+    padding: 9px;
+    border-radius: 12px;
+    cursor: pointer;
+}
+textarea{
+    outline: none;
+    flex: 1;
+    padding: 0;
+    margin: 0;
+    resize: none;
+    max-height: 96px;
+    min-height: 24px;
+    overflow-y: auto;
+    line-height: 24px;
+    border: none;
+}
+
+.message-input{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 9px;
+    padding-bottom: 9px;
+    padding-left: 18px;
+    padding-right: 18px;
+    background-color: #fff;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    height: fit-content;
+    margin-left: 24px;
+    margin-right: 24px;
+    margin-bottom: 24px;
+}
+
+
+.icon-input-part{
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex: 1;
+    padding-right: 15px;
+    color: var(--text-secondary);
+}
+
+.chat-part{
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.avatar-name{
+    font-size: larger;
+    color: var(--white);
+    font-weight: 600;
+}
+
+.avatar{
+    background-color: var(--orange);
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-name{
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.user-descr{
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.user{
+    display: flex;
+    flex-direction: row;
+    gap: 14px;
+    align-items: center;
+}
+
+.header-chat{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 24px;
+    padding-right: 37px;
+    padding-bottom: 16px;
+    padding-top: 16px;
+    border-bottom: 1px solid var(--border);
+    background-color: var(--white);
+}
+
+.status {
+    color: var(--green);
+}
+
+.button-more{
+    background-color: var(--white);
+    border: none;
+    cursor: pointer;
+}
+
+.messages-area{
+    flex: 1;
+    padding: 24px 28px;
+    overflow-y: auto;
+}

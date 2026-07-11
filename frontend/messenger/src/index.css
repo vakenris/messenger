@@ -1,0 +1,44 @@
+:root {
+  --text-main: #161a24;
+  --text-secondary: #6e7481;
+
+  --background: #f7f9fc;
+  --white: #ffffff;
+
+  --primary: #4960eb;
+  --border: #e6e9ef;
+
+  --orange: #fab566;
+  --green: #38a66b;
+  --mint: #7abfb0;
+  --purple: #a38fe8;
+  --pink: #ed8c9e;
+  --blue-light: #d1d9ff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: var(--background);
+  color: var(--text-main);
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+input,
+textarea {
+  color: var(--text-main);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-secondary);
+}
