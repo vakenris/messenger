@@ -1,10 +1,14 @@
 import { FiPlus } from "react-icons/fi"
 
-export function HeaderSidebar(){
+type HeaderSideBarProps = {
+    ClickOnAdd: () => void;
+}
+
+export function HeaderSidebar({ClickOnAdd}: HeaderSideBarProps){
     return(
         <div className="header">
             <h1>Messages</h1>
-            <button className="button-add">
+            <button className="button-add" onClick={ClickOnAdd}>
                 <FiPlus/>
             </button>
         </div>

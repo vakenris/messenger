@@ -36,6 +36,7 @@ input{
 }
 
 .sidebar{
+    position: relative;
     padding-left: 28px;
     padding-right: 28px;
     padding-top: 22px;
@@ -110,4 +111,30 @@ input{
     display: flex;
     flex-direction: column;
     gap: 5px;
+}
+
+
+.add {
+    position: absolute;
+    top: 90px;
+    right: 12px;
+    z-index: 10;
+    width: 150px;
+    padding: 10px;
+    height: fit-content;
+    background-color: var(--white);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+}
+
+
+.part-add{
+    cursor: pointer;
+    background-color: var(--white);
+    border: none;
+    width: 100%;
 }

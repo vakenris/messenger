@@ -1,5 +1,12 @@
-import { FiMoreHorizontal } from "react-icons/fi";
-export function HeaderChat(){
+import type { ReactNode } from "react";
+import { FiMoreHorizontal, FiSearch } from "react-icons/fi";
+
+type HeaderChatProps = {
+        ClickOnMenu: () => void,
+        ClickOnSearch: () => void,
+        search: ReactNode
+    }
+export function HeaderChat({ClickOnMenu, ClickOnSearch, search}:HeaderChatProps){
     return(
         <div className="header-chat">
             <div className="user">
@@ -11,9 +18,17 @@ export function HeaderChat(){
                     <text className="status">online</text>
                 </div>
             </div>
-            <button className="button-more">
-                <FiMoreHorizontal size={27}></FiMoreHorizontal>
-            </button>
+            <div className="icons-header">
+                <div className="header-search">
+                        {search}
+                </div>
+                <button className="button-search" onClick={ClickOnSearch}>
+                    <FiSearch size={27}/>
+                </button>
+                <button className="button-more" onClick={ClickOnMenu}>
+                    <FiMoreHorizontal size={27}></FiMoreHorizontal>
+                </button>
+            </div>
         </div>
     );
 }

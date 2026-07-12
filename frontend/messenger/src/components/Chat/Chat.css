@@ -110,6 +110,7 @@ textarea{
     background-color: var(--white);
     border: none;
     cursor: pointer;
+    position: relative;
 }
 
 .messages-area{
@@ -117,3 +118,53 @@ textarea{
     padding: 24px 28px;
     overflow-y: auto;
 }
+
+.more{
+    position: absolute;
+    right: 10px;
+    top: 65px;
+    width: 150px;
+    padding: 10px;
+    height: fit-content;
+    background-color: var(--white);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+}
+
+.button-delete{
+    background-color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    border: none;
+    cursor: pointer;
+}
+
+.button-search{
+    position: relative;
+    background-color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+}
+
+.icons-header{
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.header-search{
+    margin-right: 15px;
+}
+
+
+
+
+
