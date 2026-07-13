@@ -1,5 +1,4 @@
 import { FaXmark } from "react-icons/fa6";
-import { SearchInput } from "../../Sidebar/SearchInput";
 import { User } from "../User";
 import "../NewChatModel/newchat.css";
 
@@ -12,7 +11,6 @@ export function NewGroup(){
                     <FaXmark size={24} />
                 </button>
             </div>
-            <SearchInput />
             <User selectionType="checkbox" />
             <div className="buttons">
                 <button className="cancel">Cancel</button>

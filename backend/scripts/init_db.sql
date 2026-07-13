@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS chat_members (
 );
 
 CREATE TABLE IF NOT EXISTS messages (
-    id         UUID PRIMARY KEY,
+    id         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     chat_id    UUID NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
     sender_id  UUID NOT NULL REFERENCES users(id),
     dedup_key  UUID,
@@ -39,8 +39,8 @@ CREATE TABLE IF NOT EXISTS messages (
 CREATE INDEX IF NOT EXISTS idx_chat_members_user
     ON chat_members (user_id);
 
-CREATE INDEX IF NOT EXISTS idx_messages_chat_id
-    ON messages (chat_id, id DESC);
+CREATE INDEX IF NOT EXISTS idx_messages_history
+    ON messages (chat_id, created_at DESC, id DESC);
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_messages_dedup
     ON messages (chat_id, dedup_key)

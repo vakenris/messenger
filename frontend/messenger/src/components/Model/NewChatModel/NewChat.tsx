@@ -1,6 +1,4 @@
-import {} from "react-icons/fa";
 import { FaXmark } from "react-icons/fa6";
-import { SearchInput } from "../../Sidebar/SearchInput";
 import { User } from "../User";
 import "./newchat.css";
 export function NewChat(){
@@ -12,7 +10,6 @@ export function NewChat(){
                     <FaXmark size={24}></FaXmark>
                 </button>
             </div>
-            <SearchInput/>
             <User/>
             <div className="buttons">
                 <button className="cancel">Cancel</button>
