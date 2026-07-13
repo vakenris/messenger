@@ -1,9 +1,9 @@
 import './App.css'
-import { ChatPage } from './pages/ChatPage';
+import { AppRouter } from "./router/Router";
 
 function App() {
   return(
-    <ChatPage></ChatPage>
+    <AppRouter/>
   );
 }
 

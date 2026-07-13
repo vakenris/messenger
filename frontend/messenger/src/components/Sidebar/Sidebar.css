@@ -11,7 +11,7 @@
     border-radius: 12px;
 }
 
-input{
+.search-input input{
     background-color: var(--background);
     width: 100%;
     border: none;

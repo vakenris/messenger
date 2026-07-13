@@ -1,0 +1,94 @@
+.new-chat{
+    background-color: var(--white);
+    padding: 20px 30px;
+    width: 500px;
+    border-radius: 12px;
+}
+
+.header-nchat{
+    display:flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content:space-between;
+}
+
+.header-nchat button{
+    background-color: var(--white);
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+}
+
+.user-avatar{
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--orange);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.user-avatar p{
+    color: var(--white);
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.user{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    background-color: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 15px;
+    cursor:pointer;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.user-info{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+.choose{
+    width: auto;
+    flex-shrink: 0;
+}
+
+.buttons{
+    display:flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%; 
+}
+
+.cancel,
+.create{
+    padding-top: 10px;
+    padding-bottom: 10px;
+    width:100%;
+    font-size: 14px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.cancel{
+    background-color: var(--white);
+    border: 1px solid var(--border);
+}
+
+.create{
+    background-color: var(--primary);
+    color: var(--white);
+    border: none;
+}
