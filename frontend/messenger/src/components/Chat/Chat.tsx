@@ -1,33 +1,47 @@
 import { useState } from "react";
+import type { Chat as ChatType, Message as MessageType } from "../../api";
+import { Message } from "../Message/Message";
 import { HeaderChat } from "./HeaderChat";
 import { MessageInput } from "./MessageInput";
-import { SquareMore } from "./SquareMore";
-import { SearchInput } from "../Sidebar/SearchInput";
 
-export function Chat(){
-    const [isMenuOpen, setMenuOpen] = useState(false);
-    const [onSearch, setOnSearch] = useState(false);
-    let menu;
-    if (isMenuOpen){
-        menu = <SquareMore/>
+type ChatProps = {
+    chat: ChatType | null;
+    messages: MessageType[];
+    currentUserId: string;
+    error: string;
+    onSend: (text: string) => boolean;
+    onSearch: (search: string) => void;
+};
+
+export function Chat({ chat, messages, currentUserId, error, onSend, onSearch }: ChatProps) {
+    const [search, setSearch] = useState("");
+
+    if (!chat) {
+        return <div className="empty-chat">Выберите чат или создайте новый</div>;
     }
-    else{
-        menu = null
+
+    const title = chat.title || (chat.type === "direct" ? "Личный чат" : "Групповой чат");
+
+    function handleSearch(value: string) {
+        setSearch(value);
+        onSearch(value);
     }
-    let search;
-    if (onSearch){
-        search = <SearchInput/>
-    }
-    else{
-        search = null
-    }
-    return(
+
+    return (
         <div className="chat-part">
-            <HeaderChat search={search} ClickOnSearch={() => setOnSearch(!onSearch)} ClickOnMenu={() => setMenuOpen(!isMenuOpen)}/>
+            <HeaderChat title={title} search={search} onSearch={handleSearch} />
+            {error && <p className="chat-error">{error}</p>}
             <div className="messages-area">
-                {menu}
+                {messages.map((message) => (
+                    <Message
+                        key={message.id}
+                        message={message}
+                        isOwn={message.sender_id === currentUserId}
+                    />
+                ))}
+                {messages.length === 0 && <p className="empty-text">Сообщений пока нет</p>}
             </div>
-            <MessageInput/>
+            <MessageInput onSend={onSend} />
         </div>
     );
 }

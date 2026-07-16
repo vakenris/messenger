@@ -1,33 +1,31 @@
-import type { ReactNode } from "react";
-import { FiMoreHorizontal, FiSearch } from "react-icons/fi";
+import { FiSearch } from "react-icons/fi";
 
 type HeaderChatProps = {
-        ClickOnMenu: () => void,
-        ClickOnSearch: () => void,
-        search: ReactNode
-    }
-export function HeaderChat({ClickOnMenu, ClickOnSearch, search}:HeaderChatProps){
-    return(
+    title: string;
+    search: string;
+    onSearch: (value: string) => void;
+};
+
+export function HeaderChat({ title, search, onSearch }: HeaderChatProps) {
+    return (
         <div className="header-chat">
             <div className="user">
                 <div className="avatar">
-                    <text className="avatar-name">A</text>
+                    <span className="avatar-name">{title.charAt(0).toUpperCase()}</span>
                 </div>
                 <div className="user-descr">
-                    <text className="user-name">Anna Petrova</text>
-                    <text className="status">online</text>
+                    <span className="user-name">{title}</span>
+                    <span className="status">чат подключён</span>
                 </div>
             </div>
-            <div className="icons-header">
-                <div className="header-search">
-                        {search}
-                </div>
-                <button className="button-search" onClick={ClickOnSearch}>
-                    <FiSearch size={27}/>
-                </button>
-                <button className="button-more" onClick={ClickOnMenu}>
-                    <FiMoreHorizontal size={27}></FiMoreHorizontal>
-                </button>
+            <div className="search-input header-search-input">
+                <FiSearch />
+                <input
+                    value={search}
+                    onChange={(event) => onSearch(event.target.value)}
+                    type="text"
+                    placeholder="Поиск сообщений"
+                />
             </div>
         </div>
     );

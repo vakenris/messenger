@@ -1,18 +1,25 @@
-export function ChatItem() {
-    return(
-        <div className="chat-item">
+import type { Chat } from "../../api";
+
+type ChatItemProps = {
+    chat: Chat;
+    isSelected: boolean;
+    onClick: () => void;
+};
+
+export function ChatItem({ chat, isSelected, onClick }: ChatItemProps) {
+    const title = chat.title || (chat.type === "direct" ? "Личный чат" : "Групповой чат");
+
+    return (
+        <button className={`chat-item ${isSelected ? "chat-item-selected" : ""}`} onClick={onClick}>
             <div className="avatar">
-                <text className="avatar-name">A</text>
+                <span className="avatar-name">{title.charAt(0).toUpperCase()}</span>
             </div>
             <div className="text-part">
                 <div className="header-part">
-                    <text className="user-name">Anna Petrova</text>
-                    <text className="time">10:42</text>
+                    <span className="user-name">{title}</span>
                 </div>
-                <div className="message">
-                    <text>Can you send the files?</text>
-                </div>
+                <div className="chat-type">{chat.type === "direct" ? "Личный" : "Группа"}</div>
             </div>
-        </div>
+        </button>
     );
 }

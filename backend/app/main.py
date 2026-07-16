@@ -5,10 +5,12 @@ from app.api.auth import router as auth_router
 from app.api.chats import router as chats_router
 from app.api.messages import router as messages_router
 from app.api.ws import router as websocket_router
+from app.config import settings
 
 app = FastAPI(
     title="Keducation Messenger API",
-    version="1.0.0"
+    version="1.0.0",
+    root_path=settings.root_path,
 )
 
 app.add_middleware(

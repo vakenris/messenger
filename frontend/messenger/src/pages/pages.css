@@ -4,6 +4,12 @@
     min-height: 100vh;
 }
 
+@media (max-width: 760px) {
+    .chat-page {
+        grid-template-columns: 160px 1fr;
+    }
+}
+
 .enter-page,
 .registration-page {
     display: flex;

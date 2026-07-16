@@ -95,3 +95,15 @@
 .header-enter p{
     color: var(--text-secondary);
 }
+
+.button-registration:disabled {
+    cursor: wait;
+    opacity: 0.7;
+}
+
+.form-error {
+    margin: 12px 0 0;
+    color: #c73535;
+    font-size: 14px;
+    text-align: center;
+}

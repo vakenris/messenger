@@ -119,6 +119,24 @@ textarea{
     overflow-y: auto;
 }
 
+.chat-error {
+    margin: 8px 28px 0;
+    color: #c73535;
+    font-size: 13px;
+}
+
+.header-search-input {
+    width: 230px;
+}
+
+.empty-chat {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    color: var(--text-secondary);
+}
+
 .more{
     position: absolute;
     right: 10px;

@@ -12,11 +12,10 @@
 
 После запуска доступны:
 
-- frontend: http://localhost:3000
-- backend API: http://localhost:8000
-- Swagger: http://localhost:8000/docs
-- API через frontend proxy: http://localhost:3000/api
-- WebSocket через frontend proxy: `ws://localhost:3000/ws/chats/{chat_id}?token={token}`
+- frontend через общий Nginx: http://localhost:3000
+- Swagger: http://localhost:3000/api/docs
+- API через общий reverse proxy: http://localhost:3000/api
+- WebSocket через общий reverse proxy: `ws://localhost:3000/ws/chats/{chat_id}?token={token}`
 
 PostgreSQL при первом запуске автоматически получает схему из
 `backend/scripts/init_db.sql`. Сервис `seed` после готовности базы добавляет

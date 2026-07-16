@@ -57,6 +57,16 @@
     padding-left: 14px;
     padding-bottom: 15px;
     padding-top: 15px;
+    border: none;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    background-color: var(--white);
+}
+
+.chat-item:hover,
+.chat-item-selected {
+    background-color: #ECF0FF;
 }
 
 .avatar{
@@ -88,7 +98,7 @@
     justify-content: space-between;
 }
 
-.message{
+.chat-type{
     color: var(--text-secondary);
     font-size: 13px;
 }
@@ -137,4 +147,23 @@
     background-color: var(--white);
     border: none;
     width: 100%;
+}
+
+.sidebar-user {
+    margin: -12px 0 0;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.logout-button {
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: var(--white);
+    cursor: pointer;
+}
+
+.empty-text {
+    color: var(--text-secondary);
+    text-align: center;
 }
