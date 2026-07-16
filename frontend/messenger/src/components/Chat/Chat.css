@@ -50,9 +50,11 @@ textarea{
 }
 
 .chat-part{
-    min-height: 100vh;
+    height: 100vh;
+    min-height: 0;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 .avatar-name{
@@ -115,9 +117,25 @@ textarea{
 
 .messages-area{
     flex: 1;
+    min-height: 0;
     padding: 24px 28px;
     overflow-y: auto;
+    overscroll-behavior: contain;
 }
+
+.load-more-button {
+    display: block;
+    margin: 0 auto 18px;
+    padding: 8px 14px;
+    color: var(--primary);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--white);
+    cursor: pointer;
+}
+
+.status-disconnected { color: #c73535; }
+.status-connecting { color: var(--text-secondary); }
 
 .chat-error {
     margin: 8px 28px 0;
@@ -147,6 +165,8 @@ textarea{
     background-color: var(--white);
     border-radius: 12px;
     display: flex;
+    flex-direction: column;
+    gap: 4px;
     align-items: center;
     justify-content: center;
     border: 1px solid var(--border);

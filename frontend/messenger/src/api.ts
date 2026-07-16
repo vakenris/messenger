@@ -21,12 +21,21 @@ export type Message = {
     dedup_key: string | null;
     message: string;
     created_at: string;
+    client_status?: "sending" | "sent" | "failed";
 };
 
-type MessagePage = {
+export type MessagePage = {
     items: Message[];
     next_cursor: string | null;
     has_more: boolean;
+};
+
+export type ChatMember = {
+    user_id: string;
+    user_name: string;
+    user_nick: string;
+    role: "member" | "admin" | "owner";
+    joined_at: string;
 };
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
@@ -78,13 +87,54 @@ export function getChats() {
     return request<Chat[]>("/chats");
 }
 
-export function getMessages(chatId: string, search = "") {
+export function getUsers() {
+    return request<User[]>("/users");
+}
+
+export function createChat(type: "direct" | "group", invitedUserIds: string[], title: string | null = null) {
+    return request<Chat>("/chats", {
+        method: "POST",
+        body: JSON.stringify({
+            type,
+            title,
+            invited_user_ids: invitedUserIds,
+        }),
+    });
+}
+
+export function deleteChat(chatId: string) {
+    return request<{ message: string }>(`/chats/${chatId}`, {
+        method: "DELETE",
+    });
+}
+
+export function getMessages(chatId: string, search = "", cursor: string | null = null) {
+    const cursorQuery = cursor ? `&cursor=${encodeURIComponent(cursor)}` : "";
     if (search.trim()) {
         const query = encodeURIComponent(search.trim());
-        return request<MessagePage>(`/chats/${chatId}/messages/search?q=${query}`);
+        return request<MessagePage>(`/chats/${chatId}/messages/search?q=${query}${cursorQuery}`);
     }
 
-    return request<MessagePage>(`/chats/${chatId}/messages`);
+    return request<MessagePage>(`/chats/${chatId}/messages${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ""}`);
+}
+
+export function getChatMembers(chatId: string) {
+    return request<ChatMember[]>(`/chats/${chatId}/members`);
+}
+
+export function addChatMember(chatId: string, userId: string) {
+    return request<{ message: string }>(`/chats/${chatId}/members?user_id=${encodeURIComponent(userId)}`, { method: "POST" });
+}
+
+export function removeChatMember(chatId: string, userId: string) {
+    return request<{ message: string }>(`/chats/${chatId}/members/${userId}`, { method: "DELETE" });
+}
+
+export function updateChatMemberRole(chatId: string, userId: string, role: "member" | "admin") {
+    return request<ChatMember>(`/chats/${chatId}/members/${userId}/role`, {
+        method: "PATCH",
+        body: JSON.stringify({ role }),
+    });
 }
 
 export function getWebSocketUrl(chatId: string, token: string) {

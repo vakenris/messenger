@@ -5,6 +5,49 @@
     border-radius: 12px;
 }
 
+.users-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.group-title {
+    width: 100%;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    outline: none;
+}
+
+.new-chat .user-name {
+    margin: 0;
+}
+
+.new-chat .user-login {
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+.modal-error {
+    color: #c73535;
+    font-size: 13px;
+}
+
+.create:disabled {
+    opacity: 0.65;
+    cursor: wait;
+}
+
+.members-modal { max-height: 80vh; }
+.member-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.member-row span { display: block; margin-top: 4px; color: var(--text-secondary); font-size: 12px; }
+.member-actions { display: flex; gap: 6px; }
+.member-actions button, .danger-button { padding: 7px 9px; border: 1px solid var(--border); border-radius: 8px; background: var(--white); cursor: pointer; }
+.danger-button { color: #c73535; }
+.add-member-row { display: flex; gap: 10px; margin-top: 16px; }
+.add-member-row select { flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--white); }
+.add-member-row .create { width: auto; padding-inline: 18px; }
+
 .header-nchat{
     display:flex;
     flex-direction: row;
@@ -19,7 +62,7 @@
     color: var(--text-secondary);
 }
 
-.user-avatar{
+.new-chat .user-avatar{
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -30,13 +73,13 @@
     flex-shrink: 0;
 }
 
-.user-avatar p{
+.new-chat .user-avatar p{
     color: var(--white);
     font-size: 16px;
     font-weight: 600;
 }
 
-.user{
+.modal-user{
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -51,14 +94,14 @@
     margin-bottom: 10px;
 }
 
-.user-info{
+.new-chat .user-info{
     display: flex;
     flex-direction: row;
     align-items: center;
     gap: 10px;
 }
 
-.choose{
+.new-chat .choose{
     width: auto;
     flex-shrink: 0;
 }

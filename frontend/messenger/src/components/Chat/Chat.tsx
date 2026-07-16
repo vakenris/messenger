@@ -11,37 +11,74 @@ type ChatProps = {
     error: string;
     onSend: (text: string) => boolean;
     onSearch: (search: string) => void;
+    hasMore: boolean;
+    isLoadingMore: boolean;
+    onLoadMore: () => void;
+    connectionStatus: "connecting" | "connected" | "disconnected";
+    onManageMembers: () => void;
+    onDeleteChat: () => void;
 };
 
-export function Chat({ chat, messages, currentUserId, error, onSend, onSearch }: ChatProps) {
+function getChatTitle(chat: ChatType) {
+    if (chat.title) return chat.title;
+    if (chat.type === "direct") return "Personal chat";
+    return "Group chat";
+}
+
+export function Chat(props: ChatProps) {
     const [search, setSearch] = useState("");
 
-    if (!chat) {
-        return <div className="empty-chat">Выберите чат или создайте новый</div>;
+    if (!props.chat) {
+        return <div className="empty-chat">Select a chat or create a new one</div>;
     }
-
-    const title = chat.title || (chat.type === "direct" ? "Личный чат" : "Групповой чат");
 
     function handleSearch(value: string) {
         setSearch(value);
-        onSearch(value);
+        props.onSearch(value);
     }
+
+    let loadButtonText = "Load older messages";
+    if (props.isLoadingMore) loadButtonText = "Loading...";
+
+    let manageMembers: (() => void) | undefined;
+    if (props.chat.type === "group") manageMembers = props.onManageMembers;
 
     return (
         <div className="chat-part">
-            <HeaderChat title={title} search={search} onSearch={handleSearch} />
-            {error && <p className="chat-error">{error}</p>}
+            <HeaderChat
+                title={getChatTitle(props.chat)}
+                search={search}
+                onSearch={handleSearch}
+                connectionStatus={props.connectionStatus}
+                onManageMembers={manageMembers}
+                onDeleteChat={props.onDeleteChat}
+            />
+
+            {props.error && <p className="chat-error">{props.error}</p>}
+
             <div className="messages-area">
-                {messages.map((message) => (
+                {props.hasMore && (
+                    <button
+                        className="load-more-button"
+                        onClick={props.onLoadMore}
+                        disabled={props.isLoadingMore}
+                    >
+                        {loadButtonText}
+                    </button>
+                )}
+
+                {props.messages.map((message) => (
                     <Message
                         key={message.id}
                         message={message}
-                        isOwn={message.sender_id === currentUserId}
+                        isOwn={message.sender_id === props.currentUserId}
                     />
                 ))}
-                {messages.length === 0 && <p className="empty-text">Сообщений пока нет</p>}
+
+                {props.messages.length === 0 && <p className="empty-text">No messages yet</p>}
             </div>
-            <MessageInput onSend={onSend} />
+
+            <MessageInput onSend={props.onSend} />
         </div>
     );
 }

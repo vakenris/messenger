@@ -38,3 +38,12 @@
 .message-bubble-own .message-time {
     color: var(--blue-light);
 }
+
+.message-status {
+    font-size: 11px;
+    color: var(--blue-light);
+}
+
+.message-status-failed {
+    color: #ffd0d0;
+}
