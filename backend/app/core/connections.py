@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import WebSocket, WebSocketDisconnect
+from fastapi import WebSocket
 
 
 class ConnectionManager:
@@ -36,7 +36,9 @@ class ConnectionManager:
 
             try:
                 await websocket.send_json(data)
-            except WebSocketDisconnect:
+            except Exception:
+                # A closed socket can fail with RuntimeError as well as with
+                # WebSocketDisconnect, depending on the ASGI server.
                 self.disconnect(chat_id, websocket)
 
 

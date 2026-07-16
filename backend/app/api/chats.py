@@ -1,92 +1,132 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from sqlalchemy import select
-from typing import List
+import uuid
 
-from app.database import get_db
-from app.models import Chat, ChatMember, User, ChatType, ChatRole
-from app.schemas import ChatCreate, ChatOut
-from app.auth import get_current_user_db
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.security import get_current_user
+from app.database import get_session
+from app.models.chat import Chat
+from app.models.chat_member import ChatMember
+from app.models.enums import ChatRole, ChatType
+from app.models.user import User
+from app.schemas.chat import ChatCreate, ChatOut
 
 router = APIRouter(prefix="/chats", tags=["chats"])
 
+
 @router.post("", response_model=ChatOut, status_code=status.HTTP_201_CREATED)
-def create_chat(
-    chat_data: ChatCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user_db)
-):
-    new_chat = Chat(name=chat_data.name, type=chat_data.type)
-    db.add(new_chat)
-    db.commit()
-    db.refresh(new_chat)
+async def create_chat(
+    data: ChatCreate,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+) -> Chat:
+    invited_ids = set(data.invited_user_ids)
+    invited_ids.discard(current_user.id)
 
-    creator_role = ChatRole.ADMIN if chat_data.type == ChatType.GROUP else ChatRole.MEMBER
-    db.add(ChatMember(chat_id=new_chat.id, user_id=current_user.id, role=creator_role))
+    if data.type == ChatType.DIRECT and len(invited_ids) != 1:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Direct chat requires exactly one invited user",
+        )
 
-    for uid in chat_data.invited_user_ids:
-        invited_user = db.query(User).filter_by(id=uid).first()
-        if invited_user and uid != current_user.id:
-            db.add(ChatMember(chat_id=new_chat.id, user_id=uid, role=ChatRole.MEMBER))
-            
-    db.commit()
-    return new_chat
+    if invited_ids:
+        result = await session.execute(select(User.id).where(User.id.in_(invited_ids)))
+        existing_ids = set(result.scalars().all())
+        missing_ids = invited_ids - existing_ids
+        if missing_ids:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="One or more invited users were not found",
+            )
+
+    chat = Chat(
+        title=data.title,
+        type=data.type,
+        created_by=current_user.id,
+    )
+    session.add(chat)
+    await session.flush()
+
+    session.add(
+        ChatMember(chat_id=chat.id, user_id=current_user.id, role=ChatRole.OWNER)
+    )
+    session.add_all(
+        ChatMember(chat_id=chat.id, user_id=user_id, role=ChatRole.MEMBER)
+        for user_id in invited_ids
+    )
+    await session.commit()
+    await session.refresh(chat)
+    return chat
 
 
-@router.get("", response_model=List[ChatOut])
-def get_user_chats(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user_db)
-):
-    stmt = select(Chat).join(ChatMember).where(ChatMember.user_id == current_user.id)
-    return db.scalars(stmt).all()
+@router.get("", response_model=list[ChatOut])
+async def get_user_chats(
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+) -> list[Chat]:
+    result = await session.execute(
+        select(Chat)
+        .join(ChatMember, ChatMember.chat_id == Chat.id)
+        .where(ChatMember.user_id == current_user.id)
+        .order_by(Chat.created_at.desc())
+    )
+    return list(result.scalars().all())
 
 
 @router.post("/{chat_id}/members", status_code=status.HTTP_201_CREATED)
-def add_member(
-    chat_id: int,
-    user_id_to_add: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user_db)
-):
-    actor = db.query(ChatMember).filter_by(chat_id=chat_id, user_id=current_user.id).first()
-    if not actor or actor.role != ChatRole.ADMIN:
+async def add_member(
+    chat_id: uuid.UUID,
+    user_id: uuid.UUID,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+) -> dict[str, str]:
+    actor_result = await session.execute(
+        select(ChatMember).where(
+            ChatMember.chat_id == chat_id,
+            ChatMember.user_id == current_user.id,
+        )
+    )
+    actor = actor_result.scalar_one_or_none()
+    if actor is None or actor.role not in (ChatRole.OWNER, ChatRole.ADMIN):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, 
-            detail="Добавлять участников может только администратор чата"
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only a chat owner or admin can add members",
         )
 
-    user_to_add = db.query(User).filter_by(id=user_id_to_add).first()
-    if not user_to_add:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Пользователь не найден")
+    user = await session.get(User, user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
 
-    existing = db.query(ChatMember).filter_by(chat_id=chat_id, user_id=user_id_to_add).first()
-    if existing:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Пользователь уже состоит в этом чате")
+    existing = await session.get(ChatMember, (chat_id, user_id))
+    if existing is not None:
+        raise HTTPException(status_code=409, detail="User is already a chat member")
 
-    db.add(ChatMember(chat_id=chat_id, user_id=user_id_to_add, role=ChatRole.MEMBER))
-    db.commit()
-    return {"message": "Участник успешно добавлен"}
+    session.add(ChatMember(chat_id=chat_id, user_id=user_id, role=ChatRole.MEMBER))
+    await session.commit()
+    return {"message": "Member added"}
 
 
-@router.delete("/{chat_id}/members/{user_id}", status_code=status.HTTP_200_OK)
-def remove_member(
-    chat_id: int,
-    user_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user_db)
-):
-    actor = db.query(ChatMember).filter_by(chat_id=chat_id, user_id=current_user.id).first()
-    if not actor or actor.role != ChatRole.ADMIN:
+@router.delete("/{chat_id}/members/{user_id}")
+async def remove_member(
+    chat_id: uuid.UUID,
+    user_id: uuid.UUID,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+) -> dict[str, str]:
+    actor = await session.get(ChatMember, (chat_id, current_user.id))
+    if actor is None or actor.role not in (ChatRole.OWNER, ChatRole.ADMIN):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, 
-            detail="Удалять участников может только администратор чата"
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only a chat owner or admin can remove members",
         )
 
-    member_to_remove = db.query(ChatMember).filter_by(chat_id=chat_id, user_id=user_id).first()
-    if not member_to_remove:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Участник не найден в данном чате")
+    member = await session.get(ChatMember, (chat_id, user_id))
+    if member is None:
+        raise HTTPException(status_code=404, detail="Chat member not found")
+    if member.role == ChatRole.OWNER:
+        raise HTTPException(status_code=409, detail="Chat owner cannot be removed")
 
-    db.delete(member_to_remove)
-    db.commit()
-    return {"message": "Участник успешно удален"}
+    await session.delete(member)
+    await session.commit()
+    return {"message": "Member removed"}

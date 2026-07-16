@@ -5,7 +5,10 @@ from sqlalchemy import select, tuple_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_session
+from app.core.security import get_current_user
+from app.models.chat_member import ChatMember
 from app.models.message import Message
+from app.models.user import User
 from app.schemas.message import MessagePageResponse
 
 
@@ -13,6 +16,16 @@ router = APIRouter(
     prefix="/chats",
     tags=["messages"],
 )
+
+
+async def require_chat_member(
+    session: AsyncSession,
+    chat_id: uuid.UUID,
+    user_id: uuid.UUID,
+) -> None:
+    member = await session.get(ChatMember, (chat_id, user_id))
+    if member is None:
+        raise HTTPException(status_code=403, detail="Not a chat member")
 
 
 @router.get(
@@ -24,7 +37,9 @@ async def get_message_history(
     cursor: uuid.UUID | None = None,
     limit: int = Query(default=30, ge=1, le=100),
     session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
 ) -> MessagePageResponse:
+    await require_chat_member(session, chat_id, current_user.id)
     query = select(Message).where(Message.chat_id == chat_id)
 
     if cursor is not None:
@@ -80,7 +95,9 @@ async def search_messages(
     cursor: uuid.UUID | None = None,
     limit: int = Query(default=30, ge=1, le=100),
     session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
 ) -> MessagePageResponse:
+    await require_chat_member(session, chat_id, current_user.id)
     search_text = q.strip()
 
     if not search_text:

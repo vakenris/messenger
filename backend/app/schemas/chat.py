@@ -1,18 +1,20 @@
-from pydantic import BaseModel, Field
-from typing import Optional, List
+import uuid
 from datetime import datetime
+
+from pydantic import BaseModel, ConfigDict, Field
+
 from app.models.enums import ChatType
 
 class ChatCreate(BaseModel):
-    name: Optional[str] = Field(None, max_length=100)
+    title: str | None = Field(None, max_length=255)
     type: ChatType
-    invited_user_ids: List[int] = []
+    invited_user_ids: list[uuid.UUID] = Field(default_factory=list)
 
 class ChatOut(BaseModel):
-    id: int
-    name: Optional[str]
-    type: ChatType
-    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
 
-    class Config:
-        from_attributes = True
+    id: uuid.UUID
+    title: str | None
+    type: ChatType
+    created_by: uuid.UUID
+    created_at: datetime

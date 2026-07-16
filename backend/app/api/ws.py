@@ -1,14 +1,19 @@
 import uuid
+from json import JSONDecodeError
 
-from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect, status
+from jose import JWTError, jwt
 from pydantic import ValidationError
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.connections import connection_manager
+from app.config import settings
 from app.database import get_session
 from app.models.message import Message
+from app.models.chat_member import ChatMember
+from app.models.user import User
 from app.schemas.message import MessageResponse
 from app.schemas.websocket import WebSocketMessageIn
 
@@ -16,9 +21,51 @@ from app.schemas.websocket import WebSocketMessageIn
 router = APIRouter(tags=["websocket"])
 
 
+async def authenticate_websocket(
+    websocket: WebSocket,
+    session: AsyncSession,
+) -> User | None:
+    """Authenticate before accepting the socket.
+
+    Browsers cannot set an Authorization header for WebSocket handshakes, so
+    clients may pass the access token as ``?token=...``. Non-browser clients
+    may use the regular Bearer header.
+    """
+
+    token = websocket.query_params.get("token")
+    authorization = websocket.headers.get("authorization", "")
+    if token is None and authorization.lower().startswith("bearer "):
+        token = authorization[7:].strip()
+
+    if not token:
+        return None
+
+    try:
+        payload = jwt.decode(
+            token,
+            settings.jwt_secret,
+            algorithms=[settings.jwt_algorithm],
+        )
+        user_id = uuid.UUID(payload["sub"])
+    except (JWTError, KeyError, TypeError, ValueError):
+        return None
+
+    result = await session.execute(select(User).where(User.id == user_id))
+    return result.scalar_one_or_none()
+
+
+async def is_chat_member(
+    session: AsyncSession,
+    chat_id: uuid.UUID,
+    user_id: uuid.UUID,
+) -> bool:
+    return await session.get(ChatMember, (chat_id, user_id)) is not None
+
+
 async def save_message(
     session: AsyncSession,
     chat_id: uuid.UUID,
+    sender_id: uuid.UUID,
     data: WebSocketMessageIn,
 ) -> tuple[Message, bool]:
     """Save a message and return (message, was_created)."""
@@ -36,7 +83,7 @@ async def save_message(
 
     message = Message(
         chat_id=chat_id,
-        sender_id=data.sender_id,
+        sender_id=sender_id,
         dedup_key=data.dedup_key,
         message=data.message,
     )
@@ -69,15 +116,29 @@ async def chat_websocket(
     chat_id: uuid.UUID,
     session: AsyncSession = Depends(get_session),
 ) -> None:
+    current_user = await authenticate_websocket(websocket, session)
+    if current_user is None:
+        await websocket.close(
+            code=status.WS_1008_POLICY_VIOLATION,
+            reason="Unauthorized",
+        )
+        return
+
+    if not await is_chat_member(session, chat_id, current_user.id):
+        await websocket.close(
+            code=status.WS_1008_POLICY_VIOLATION,
+            reason="Not a chat member",
+        )
+        return
+
     await connection_manager.connect(chat_id, websocket)
 
     try:
         while True:
-            raw_data = await websocket.receive_json()
-
             try:
+                raw_data = await websocket.receive_json()
                 data = WebSocketMessageIn.model_validate(raw_data)
-            except ValidationError:
+            except (JSONDecodeError, ValidationError):
                 await websocket.send_json(
                     {
                         "type": "error",
@@ -89,6 +150,7 @@ async def chat_websocket(
             saved_message, was_created = await save_message(
                 session=session,
                 chat_id=chat_id,
+                sender_id=current_user.id,
                 data=data,
             )
             message_data = MessageResponse.model_validate(saved_message).model_dump(

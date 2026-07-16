@@ -44,13 +44,11 @@ async def get_current_user(
         payload = jwt.decode(
             token, settings.jwt_secret, algorithms=[settings.jwt_algorithm]
         )
-        user_id = payload.get("sub")
-        if user_id is None:
-            raise credentials_error
-    except JWTError:
-        raise credentials_error
+        user_id = uuid.UUID(payload["sub"])
+    except (JWTError, KeyError, TypeError, ValueError):
+        raise credentials_error from None
 
-    result = await session.execute(select(User).where(User.id == uuid.UUID(user_id)))
+    result = await session.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
     if user is None:
         raise credentials_error

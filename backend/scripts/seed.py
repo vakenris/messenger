@@ -9,76 +9,98 @@ DATABASE_URL = os.getenv(
     "postgresql://messenger:messenger@localhost:5432/messenger",
 )
 
+ALICE_ID = uuid.UUID("00000000-0000-0000-0000-000000000001")
+ALEX_ID = uuid.UUID("00000000-0000-0000-0000-000000000002")
+SERGEY_ID = uuid.UUID("00000000-0000-0000-0000-000000000003")
+DIRECT_CHAT_ID = uuid.UUID("10000000-0000-0000-0000-000000000001")
+GROUP_CHAT_ID = uuid.UUID("10000000-0000-0000-0000-000000000002")
+
 
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 
 def main() -> None:
-    alice_id = uuid.uuid4()
-    bob_id = uuid.uuid4()
-    carol_id = uuid.uuid4()
+    password_hash = hash_password("password123")
 
-    direct_chat_id = uuid.uuid4()
-    group_chat_id = uuid.uuid4()
-
-    with psycopg.connect(DATABASE_URL) as conn:
-        with conn.cursor() as cur:
-            cur.execute("TRUNCATE messages, chat_members, chats, users CASCADE;")
-
+    with psycopg.connect(DATABASE_URL) as connection:
+        with connection.cursor() as cursor:
             users = [
-                (alice_id, "Алиса", "alice", hash_password("password123")),
-                (alex_id, "Саша", "alex", hash_password("password123")),
-                (sergey_id, "Сергей", "sergey", hash_password("password123")),
+                (ALICE_ID, "Алиса", "alice", password_hash),
+                (ALEX_ID, "Саша", "alex", password_hash),
+                (SERGEY_ID, "Сергей", "sergey", password_hash),
             ]
-            cur.executemany(
+            cursor.executemany(
                 "INSERT INTO users (id, user_nick, user_name, hashed_password) "
-                "VALUES (%s, %s, %s, %s);",
+                "VALUES (%s, %s, %s, %s) "
+                "ON CONFLICT (id) DO NOTHING",
                 users,
             )
 
-            cur.execute(
+            chats = [
+                (DIRECT_CHAT_ID, "direct", None, ALICE_ID),
+                (GROUP_CHAT_ID, "group", "Практика ВК", ALICE_ID),
+            ]
+            cursor.executemany(
                 "INSERT INTO chats (id, type, title, created_by) "
-                "VALUES (%s, 'direct', NULL, %s);",
-                (direct_chat_id, alice_id),
-            )
-            cur.execute(
-                "INSERT INTO chats (id, type, title, created_by) "
-                "VALUES (%s, 'group', %s, %s);",
-                (group_chat_id, "Практика ВК", alice_id),
+                "VALUES (%s, %s, %s, %s) "
+                "ON CONFLICT (id) DO NOTHING",
+                chats,
             )
 
             members = [
-                (direct_chat_id, alice_id, "owner"),
-                (direct_chat_id, alex_id, "member"),
-                (group_chat_id, alice_id, "owner"),
-                (group_chat_id, alex_id, "admin"),
-                (group_chat_id, sergey_id, "member"),
+                (DIRECT_CHAT_ID, ALICE_ID, "owner"),
+                (DIRECT_CHAT_ID, ALEX_ID, "member"),
+                (GROUP_CHAT_ID, ALICE_ID, "owner"),
+                (GROUP_CHAT_ID, ALEX_ID, "admin"),
+                (GROUP_CHAT_ID, SERGEY_ID, "member"),
             ]
-            cur.executemany(
+            cursor.executemany(
                 "INSERT INTO chat_members (chat_id, user_id, role) "
-                "VALUES (%s, %s, %s);",
+                "VALUES (%s, %s, %s) "
+                "ON CONFLICT (chat_id, user_id) DO NOTHING",
                 members,
             )
 
             messages = [
-                (uuid.uuid4(), direct_chat_id, alice_id, "Привет, Саша!"),
-                (uuid.uuid4(), direct_chat_id, bob_id, "Привет, Алиса!"),
-                (uuid.uuid4(), group_chat_id, alice_id, "Всем привет в группе"),
-                (uuid.uuid4(), group_chat_id, carol_id, "Привет!"),
+                (
+                    uuid.UUID("20000000-0000-0000-0000-000000000001"),
+                    DIRECT_CHAT_ID,
+                    ALICE_ID,
+                    "Привет, Саша!",
+                ),
+                (
+                    uuid.UUID("20000000-0000-0000-0000-000000000002"),
+                    DIRECT_CHAT_ID,
+                    ALEX_ID,
+                    "Привет, Алиса!",
+                ),
+                (
+                    uuid.UUID("20000000-0000-0000-0000-000000000003"),
+                    GROUP_CHAT_ID,
+                    ALICE_ID,
+                    "Всем привет в группе",
+                ),
+                (
+                    uuid.UUID("20000000-0000-0000-0000-000000000004"),
+                    GROUP_CHAT_ID,
+                    SERGEY_ID,
+                    "Привет!",
+                ),
             ]
-            cur.executemany(
+            cursor.executemany(
                 "INSERT INTO messages (id, chat_id, sender_id, message) "
-                "VALUES (%s, %s, %s, %s);",
+                "VALUES (%s, %s, %s, %s) "
+                "ON CONFLICT (id) DO NOTHING",
                 messages,
             )
 
-        conn.commit()
+        connection.commit()
 
-    print("Тестовые данные загружены:")
-    print("  Пользователи: alice, alex, sergey (пароль у всех: password123)")
-    print(f"  Личный чат:   {direct_chat_id}")
-    print(f"  Групповой чат: {group_chat_id}")
+    print("Seed completed.")
+    print("Users: alice, alex, sergey; password: password123")
+    print(f"Direct chat: {DIRECT_CHAT_ID}")
+    print(f"Group chat:  {GROUP_CHAT_ID}")
 
 
 if __name__ == "__main__":
