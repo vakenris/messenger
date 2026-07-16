@@ -1,0 +1,22 @@
+.chat-page{
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    height: 100vh;
+    overflow: hidden;
+}
+
+@media (max-width: 760px) {
+    .chat-page {
+        grid-template-columns: 160px 1fr;
+    }
+}
+
+.enter-page,
+.registration-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--background);
+    min-height: 100vh;
+}
+

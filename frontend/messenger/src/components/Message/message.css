@@ -1,0 +1,49 @@
+.message-row {
+    display: flex;
+    margin-bottom: 10px;
+}
+
+.message-row-own {
+    justify-content: flex-end;
+}
+
+.message-bubble {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    max-width: 70%;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background-color: var(--white);
+}
+
+.message-bubble-own {
+    color: var(--white);
+    border-color: var(--primary);
+    background-color: var(--primary);
+}
+
+.message-text {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.message-time {
+    flex-shrink: 0;
+    color: var(--text-secondary);
+    font-size: 10px;
+}
+
+.message-bubble-own .message-time {
+    color: var(--blue-light);
+}
+
+.message-status {
+    font-size: 11px;
+    color: var(--blue-light);
+}
+
+.message-status-failed {
+    color: #ffd0d0;
+}

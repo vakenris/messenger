@@ -1,0 +1,109 @@
+.registration{
+    background-color: var(--white);
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-top: 25px;
+    padding-bottom: 25px;
+    border-radius: 15px;
+    width: 360px;
+}
+.header-registration{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.header-registration h1{
+    padding: 0;
+    margin: 0;
+
+}
+.header-registration p{
+    padding: 0;
+    margin: 0;
+    color: var(--text-secondary);
+}
+
+.form{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    margin-top: 15px;
+}
+
+.form input{
+    padding: 10px 10px;
+    border-radius: 8px;
+    background-color: var(--white);
+    border: 1px solid var(--border);
+    width: 100%;
+}
+
+.button-registration{
+    margin-top: 15px;
+    background-color: var(--primary);
+    color: var(--white);
+    border: none;
+    width: 100%;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.already-account {
+    color: var(--text-secondary);
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 7px;
+}
+
+.already-account a{
+    color: var(--primary);
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+
+.enter{
+    background-color: var(--white);
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-top: 25px;
+    padding-bottom: 25px;
+    border-radius: 15px;
+    width: 360px;
+}
+
+.header-enter{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.header-enter h1{
+    margin: 0;
+}
+
+.header-enter p{
+    color: var(--text-secondary);
+}
+
+.button-registration:disabled {
+    cursor: wait;
+    opacity: 0.7;
+}
+
+.form-error {
+    margin: 12px 0 0;
+    color: #c73535;
+    font-size: 14px;
+    text-align: center;
+}
