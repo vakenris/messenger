@@ -9,6 +9,15 @@ Full-stack мессенджер с личными и групповыми чат
 ![WebSocket](https://img.shields.io/badge/WebSocket-010101?style=flat&logo=socketdotio&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)
 ![Nginx](https://img.shields.io/badge/Nginx-009639?style=flat&logo=nginx&logoColor=white)
+
+## Демо
+
+Добавление нового чата и его удаление
+
+
+Создание новой группы и ее удаление
+
+
 ## Возможности
 
 - Регистрация и JWT-авторизация
